@@ -1,0 +1,166 @@
+openapi: 3.0.0
+info:
+  title: API для работы с каталогом товаров
+  description: сервис API, описанный в рамках курса Neoflex
+  version: 1.0.0
+
+tags:
+  - name: getGoods
+    description: Получение товара
+
+paths:
+  /goods:
+    get:
+      tags:
+        - getGoods
+      summary: Получаем товар по его идентификатору
+      description: Метод получает строку с наименованием товара и его категорией по запрошенному идентификатору
+      operationId: getGoods
+      parameters:
+        - $ref: '#/components/parameters/GoodsId'
+      responses:
+        '200':
+          $ref: '#/components/responses/GetGoodsResponse'
+        '400':
+          description: Передан некорректный запрос
+        '401':
+          description: Пользователь не авторизован
+        '403':
+          description: У пользователя отсутствуют права
+        '404':
+          description: Запись не найдена
+        '500':
+          description: Внутреняя ошибка сервера
+
+    post:
+      summary: Создать товар
+      description: Метод отправляет данные для создания нового товара
+      operationId: postGoods
+      requestBody:
+        description: Атрибуты создаваемого товара
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                goodsName:
+                  description: Название товара
+                  type: string
+                  example: Молоко домин на даче
+                goodsCatId:
+                  description: Идентификатор категории товара
+                  type: integer
+                  example: '123'
+                goodsMakerId:
+                  description: Идентификатор изготовителя товара
+                  type: integer
+                  example: '456'
+                unitType:
+                  description: Тип единицы измерения товара
+                  type: string
+                  x-enum-varnames:
+                    - MILLILITER
+                    - GRAMM
+                    - PACK
+                    - UNIT
+                    - NOT_APPLICABLE
+                  enum:
+                    - миллилитр
+                    - грамм
+                    - упак
+                    - ед
+                    - н/д
+      responses:
+        '201':
+          $ref: '#/components/responses/PostGoodsResponse'
+        '400':
+          description: Передан некорректный запрос
+        '401':
+          description: Пользователь не авторизован. Передан неккоректный токен
+        '403':
+          description: У пользователя отсутствуют права
+        '500':
+          description: Внутреняя ошибка сервера
+
+  /goods/{goodsId}:
+    delete:
+      summary: Удаление товара
+      description: Метод удаляет запись о товаре по его идентификатору
+      operationId: DeleteGoods
+      parameters:
+        - name: goodsId
+          in: path
+          required: true
+          description: Идентификатор товара
+          schema:
+            type: integer
+            example: '49'
+        - name: userLogin
+          in: query
+          description: Логин пользователя, удалившего товар
+          schema:
+            type: string
+            example: 'User007'
+        - name: userCat
+          in: query
+          description: Каталог, из которого пользователь запросил удаление товара
+          schema:
+            type: string
+            example: 'Овощи'
+
+      responses:
+        '200':
+          description: OK, товар удален
+        '400':
+          description: Передан некорректный запрос
+        '401':
+          description: Пользователь не авторизован
+        '403':
+          description: У пользователя отсутствуют права
+        '404':
+          description: Запись не найдена
+        '500':
+          description: Внутреняя ошибка сервера
+
+components:
+  responses:
+    PostGoodsResponse:
+      description: OK, Created
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              goodsId:
+                description: Идентификатор товара
+                type: integer
+                example: '55'
+    GetGoodsResponse:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              goodsName:
+                description: Название товара
+                type: string
+                example: Молоко Домик на даче
+              goodsCat:
+                description: Категория товара
+                type: string
+                example: Молочные товары без ЗМЖ
+              goodsMaker:
+                description: Название изготовителя товара
+                type: string
+                example: Верхненижний молокозавод, АО
+
+  parameters:
+    GoodsId:
+      name: goodsId
+      required: true
+      description: Идентификатор товара
+      in: query
+      schema:
+        type: integer
+        example: '49'
